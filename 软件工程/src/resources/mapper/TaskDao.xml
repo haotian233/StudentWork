@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itcast.dao.TaskDao">
+
+	<!-- 添加 任务 -->
+	<insert id="addTask" parameterType="com.itcast.entity.Task">
+		insert into
+		task(taskNum,taskName,taskDescribe,taskFileName,startTime,userId)
+		values(#{taskNum},#{taskName},#{taskDescribe},#{taskFileName},sysdate(),#{userId})
+	</insert>
+
+	<!-- 根据任务编号 查询 任务信息 -->
+	<select id="queryTaskById" resultType="com.itcast.entity.Task">
+		select *,(select name from
+		user where id = userId) name from
+		task where
+		taskNum = #{id}
+	</select>
+
+	<!-- 删除任务 -->
+	<delete id="deleteTaskById">
+		delete from task where taskNum = #{id}
+	</delete>
+
+	<!-- 修改任务 -->
+	<update id="editTask" parameterType="com.itcast.entity.Task">
+		update task set taskName =
+		#{taskName},taskDescribe = #{taskDescribe}
+		,taskFileName=#{taskFileName}
+		where taskNum = #{taskNum}
+	</update>
+
+	<select id="queryTaskByLike" resultType="com.itcast.entity.Task">
+		select (select count(*) from
+		task where 1=1
+		<if test="userId != null and userId != ''">
+			and userId = #{userId}
+		</if>
+		<if test="name != null and name != ''">
+			and (taskNum like '%${name}%'
+			or taskName like '%${name}%'
+			or taskDescribe like '%${name}%')
+		</if>
+		) total,t.*,(select name from
+		user where id = t.userId) name from
+		task t
+		where 1=1
+		<if test="userId != null and userId != ''">
+			and t.userId = #{userId}
+		</if>
+		<if test="name != null and name != ''">
+			and (t.taskNum like '%${name}%'
+			or t.taskName like
+			'%${name}%'
+			or t.taskDescribe like '%${name}%')
+		</if>
+		order by t.startTime desc
+		limit #{offset},#{rows}
+	</select>
+
+</mapper>

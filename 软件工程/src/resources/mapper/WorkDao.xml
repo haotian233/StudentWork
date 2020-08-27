@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itcast.dao.WorkDao">
+
+    <!-- 添加 作业 -->
+    <insert id="addWork" parameterType="com.itcast.entity.Work">
+		insert into
+		work(workNum,workName,workAnswer,workFileName,upTime,taskNum,userId)
+		values(#{workNum},#{workName},#{workAnswer},#{workFileName},sysdate(),#{taskNum},#{userId})
+	</insert>
+
+    <!-- 根据作业编号 查询 作业信息 -->
+    <select id="queryWorkById" resultType="com.itcast.entity.Work">
+		select a.*,(select name
+		from user where id = a.userId)
+		name,b.taskName,b.taskDescribe,b.taskFileName,
+		b.startTime,(select name
+		from user where id = b.userId) teacherName from work a,task b where
+		a.taskNum = b.taskNum
+		and a.workNum = #{id}
+	</select>
+
+    <!-- 删除作业 -->
+    <delete id="deleteWorkById">
+		delete from work where workNum = #{id}
+	</delete>
+
+    <!-- 修改作业 -->
+    <update id="editWork" parameterType="com.itcast.entity.Work">
+		update work set workName =
+		#{workName},workAnswer = #{workAnswer},workFileName = #{workFileName}
+		where
+		workNum =
+		#{workNum}
+	</update>
+
+    <select id="queryWorkByLike" resultType="com.itcast.entity.Work">
+        select (select count(*) from
+        work a,task b
+        where 1=1
+        and a.taskNum =
+        b.taskNum
+        <if test="teacherId != null and teacherId != ''">
+            and b.userId = #{teacherId}
+        </if>
+        <if test="taskNum != null and taskNum != ''">
+            and a.taskNum = #{taskNum}
+        </if>
+        <if test="userId != null and userId != ''">
+            and a.userId = #{userId}
+        </if>
+        <if test="name != null and name != ''">
+            and (a.workNum like '%${name}%'
+            or a.workName like
+            '%${name}%'
+            or a.workAnswer like '%${name}%'
+            or b.taskNum like '%${name}%'
+            or b.taskName like '%${name}%'
+            )
+        </if>
+        ) total,t.*,(select name
+        from user where id = t.userId)
+        name,tt.taskName,tt.taskDescribe,tt.taskFileName,
+        tt.startTime,(select
+        name
+        from user where id = tt.userId) teacherName from
+        work t,task tt
+        where 1=1
+        and t.taskNum = tt.taskNum
+        <if test="teacherId != null and teacherId != ''">
+            and tt.userId = #{teacherId}
+        </if>
+        <if test="taskNum != null and taskNum != ''">
+            and t.taskNum = #{taskNum}
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.userId = #{userId}
+        </if>
+        <if test="name != null and name != ''">
+            and (t.workNum like '%${name}%'
+            or t.workName like
+            '%${name}%'
+            or
+            t.workAnswer like '%${name}%'
+            or tt.taskNum like '%${name}%'
+            or tt.taskName like '%${name}%'
+            )
+        </if>
+        order by t.upTime desc
+        limit #{offset},#{rows}
+    </select>
+
+</mapper>

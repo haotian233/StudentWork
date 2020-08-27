@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+    <!-- 第一步：注解扫描配置，只扫描注解为@Controller的注解 -->
+    <context:component-scan base-package="com.itcast">
+        <context:include-filter type="annotation"
+                                expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <!-- 第二步：配置mvc注解驱动，防止前后端分离造成JSON传输的时候中文乱码 -->
+    <mvc:annotation-driven>
+        <!-- 2.1消息转换器 -->
+        <!-- 解决@ResponseBody中文乱码 -->
+        <mvc:message-converters register-defaults="true">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes" value="text/plain;charset=UTF-8"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!-- 第三步：配置视图解析器 -->
+    <bean id="internalResourceViewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 前缀 -->
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <!-- 后缀 -->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 定义文件上传解析器 -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 设定默认编码 -->
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <!-- 设定文件上传的最大值10MB，10*1024*1024 -->
+        <property name="maxUploadSize" value="10485760"></property>
+    </bean>
+    <!-- 第四步：加载静态资源 （可选） -->
+    <mvc:resources location="/WEB-INF/css/" mapping="/css/**"></mvc:resources>
+    <mvc:resources location="/WEB-INF/img/" mapping="/img/**"></mvc:resources>
+    <mvc:resources location="/WEB-INF/js/" mapping="/js/**"></mvc:resources>
+</beans>
